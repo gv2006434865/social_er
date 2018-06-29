@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	
+	<link rel="stylesheet" href="styles/cy2neo.css">
+	<link rel="stylesheet" href="styles/vendor.css"> <!-- bootstrap-->
+	<link rel="stylesheet" href="styles/tab.css">
+    <title>Social Visualization</title>
+	
+</head>
+<body onload="load_home()">
+<!--br>
+<div style="background-color:#CCEEFF;padding:10px;5">Social Visualization</div>
+<br-->
+
+<script type="text/javascript" src="js/change.js"></script>
+
+  <div class="tab">
+  <button class="tablinks" onclick="tabDataChange(event, 'Fb')">Facebook <i class="fa fa-caret-down"></i></button>
+  <button class="tablinks" onclick="tabDataChange(event, 'Twitter')">Twitter</button>
+  <button class="tablinks" onclick="tabDataChange(event, 'Total')">Total</button>
+  </div>
+  
+
+  <div id="Fb" class="tabcontent" >
+	<div id="fb_l" class="DIV1"></div>	  
+	<div id="fb_r" class="DIV2">Fb</div>
+  </div>
+  
+  <div id="Twitter" class="tabcontent">
+	<div id="tw_l" class="DIV1"></div>
+	<div id="tw_r" class="DIV2">Twitter</div>
+  </div>
+
+  <div id="Total" class="tabcontent">
+	<div id="Total_l" class="DIV1"></div>
+	<div id="Total_r" class="DIV2">Total</div>
+  </div>
+  <script>
+  function tabDataChange(evt, tabName) {	
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+	function load_home() {
+	document.getElementById("tw_l").innerHTML = '<object type="text/html" data="Tw_left.html" width="100%" height="700"></object>';
+	document.getElementById("tw_r").innerHTML = '<object type="text/html" data="Tw_right.html" width="100%" height="700"></object>';
+	document.getElementById("Total_l").innerHTML = '<object type="text/html" data="Total_left.html" width="100%" height="700"></object>';
+	document.getElementById("Total_r").innerHTML = '<object type="text/html" data="Total_right.html" width="100%" height="700"></object>';
+	document.getElementById("fb_l").innerHTML = '<object type="text/html" data="Fb_left.html" width="100%" height="700"></object>';
+	document.getElementById("fb_r").innerHTML = '<object type="text/html" data="Fb_right.html" width="100%" height="700"></object>';
+
+	}
+  </script>
+
+<br>
+
+
+</body>
+</html>

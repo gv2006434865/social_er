@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="http://d3js.org/d3.v4.min.js" type="text/javascript"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="https://cdn.rawgit.com/neo4j/neo4j-javascript-driver/1.2/lib/browser/neo4j-web.min.js"></script>
+<script type="text/javascript" src="js/neo4jQuery_Fb_r2.js"></script>
+<link rel="stylesheet" href="css/donut.css">
+<link rel="stylesheet" href="css/tab.css">
+</head>
+<style type="text/css">
+		.button {
+			background-color: #4CAF50; /* Green */
+			border: none;
+			color: white;
+			padding: 10px 20px;
+			text-align: center;
+			text-decoration: none;
+			display: inline-block;
+			font-size: 16px;
+		}
+		try {
+		  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		  width: 960px;
+		  height: 500px;
+		  position: relative;
+		}
+		.tabcontent::-webkit-scrollbar {
+			display: none;
+		}
+</style>
+<body onload="load_home()">
+<div style="overflow: hidden;">
+<button class="button" onclick="tabDataChange(event, 'Total')">Total</button>
+<button class="button" onclick="tabDataChange(event, 'Age')">Age</button>
+<button class="button" onclick="tabDataChange(event, 'Social')">Social</button>
+</div>
+
+<div id="Total" class="tabcontent" ></div>
+<div id="Age" class="tabcontent"></div>
+<div id="Social" class="tabcontent"></div>
+
+<div style="padding-top:15px;">
+<try></try>
+<cir ></cir>
+<h2o></h2o>
+</div>
+
+	
+
+</body>
+
+
+<script>
+	function tabDataChange(evt, tabName) {	
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
+
+    function load_home() {
+	document.getElementById("Total").innerHTML = '<object type="text/html" data="tw_r2_location_total.html" width="100%" height="600" ></object>';
+	}
+    </script>
