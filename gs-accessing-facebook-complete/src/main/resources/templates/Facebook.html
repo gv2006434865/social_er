@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<title>Hello Facebook</title>
+	</head>
+	<body>
+		<h3>Hello, <span th:text="${facebookProfile.name}">Some User</span>!</h3>
+		<span th:text="${facebookProfile.birthday}">Some User</span>
+		<h4>Here is your friend:</h4>
+		<div th:each="friends:${friend}">
+			<b th:text="${friends.name}"></b>
+			<hr/>
+		</div>
+		
+		<h4>Here is your feed:</h4>
+		
+		<div th:each="post:${feed}">
+			<b th:text="${post.from.name}">from</b> wrote:
+			<p th:text="${post.message}">message text</p>
+			<img th:if="${post.picture}" th:src="${post.picture}"/>
+			<hr/>
+		</div>
+	</body>
+</html>
