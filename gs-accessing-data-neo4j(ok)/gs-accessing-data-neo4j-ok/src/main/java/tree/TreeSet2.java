@@ -1,32 +1,21 @@
 package tree;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
-
-import org.simmetrics.StringMetric;
-import org.simmetrics.metrics.StringMetrics;
-
-import com.google.common.collect.Lists;
-
 import Integration.ER;
-import Integration.Integration;
-import Integration.Integration2;
 import Integration.Iterative;
 import hello.FBPersonRepository;
 import hello.FbUser;
 import hello.TWITTERPersonRepository;
-import hello.TotalUser;
 import hello.TotalPersonRepository;
+import hello.TotalUser;
 import hello.TwitterUser;
 
 public class TreeSet2 {
-
-	private String social, uid, name, location, email, birthday;
 
 	List<FbUser> fblist = new ArrayList<FbUser>();
 	List<String> fbnamelist = new ArrayList<String>();
@@ -48,7 +37,9 @@ public class TreeSet2 {
 	static TotalPersonRepository personRepository3;
 	String[][] ans_return;
 	List<TwitterUser> FollowingList2, TrackingList2, FRIENDSList2;
-
+	
+	int m=1,n=1,p=3;
+	
 	public TreeSet2(FBPersonRepository personRepository1) {
 		this.personRepository1 = personRepository1;
 		Iterable<FbUser> fp = personRepository1.findAll(); // 從personRepository取得之前存入Neo4j的資料
@@ -63,21 +54,30 @@ public class TreeSet2 {
 		}
 		String[][] rank = new Ranking2(fbnamelist, fbemaillist, fblocationlist, fbbirthdaylist, fbuidlist, fbgenderlist)
 				.getRank();
-		int m=2,n=1,p=2;
+		for(int i=0;i<rank.length;i++)
+			System.out.println("rank[i][0] : "+rank[i][0]);
 		String[][] a = new Distinct_Tree(rank, personRepository1, m).get_Distinct_Tree();
 		String[][] b = new Iterative(a, rank, personRepository1, n, m).get_Iterative();
 		String[][] c = new ER(b, rank, personRepository1, p, m+n).get_ER();
 		FbUser UserNode = null, UserNode2 = null;
 		for (int i = 0; i < c.length; i++) {
-			if (c[i][0] == null)
-				break;
-			UserNode = personRepository1.findByUid(c[i][0]); // 找到第一個帳號
-			UserNode2 = personRepository1.findByUid(c[i][1]); // 找到第二個帳號
+			if (c[i][0] == null) break;
+			Iterable<FbUser> it = personRepository1.findAll();
+			String s1 = find_node3(c[i][0], it);
+			String s2 = find_node3(c[i][1], it);
+			if (s1.equals(s2))	continue;
+			UserNode = personRepository1.findByUid(s1); // 找到第一個帳號
+			UserNode2 = personRepository1.findByUid(s2); // 找到第二個帳號
 			UserNode.setName(combin(UserNode.getName(), UserNode2.getName()));
 			UserNode.setEmail(combin(UserNode.getEmail(), UserNode2.getEmail()));
 			UserNode.setLocation(combin(UserNode.getLocation(), UserNode2.getLocation()));
 			UserNode.setBirthday(combin(UserNode.getBirthday(), UserNode2.getBirthday()));
 			UserNode.setUid(combin(UserNode.getUid(), UserNode2.getUid()));
+			if (UserNode2.getfriends() != null) {
+				Iterator<FbUser> friend = UserNode2.getfriends().iterator();
+				for (int j = 0; j < UserNode2.getfriends().size(); j++)
+					UserNode.friendWith(personRepository1.findByUid(friend.next().getUid()));
+			}
 			personRepository1.save(UserNode);
 			personRepository1.delete(UserNode2);// 刪除第二帳號
 		}
@@ -95,10 +95,8 @@ public class TreeSet2 {
 			twuidlist.add(user.getUid());
 			twgenderlist.add(user.getGender());
 		}
-		System.out.println("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈");
 		String[][] rank = new Ranking2(twnamelist, twemaillist, twlocationlist, twbirthdaylist, twuidlist, twgenderlist)
 				.getRank();
-		int m=2,n=1,p=2;
 		String[][] a = new Distinct_Tree(rank, personRepository2, m).get_Distinct_Tree();
 		String[][] b = new Iterative(a, rank, personRepository2, n, m).get_Iterative();
 		String[][] c = new ER(b, rank, personRepository2, p, m+n).get_ER();
@@ -106,16 +104,41 @@ public class TreeSet2 {
 		for (int i = 0; i < c.length; i++) {
 			if (c[i][0] == null)
 				break;
-			UserNode = personRepository2.findByUid(c[i][0]); // 找到第一個帳號
-			UserNode2 = personRepository2.findByUid(c[i][1]); // 找到第二個帳號
+			Iterable<TwitterUser> it = personRepository2.findAll();
+			String s1 = find_node2(c[i][0], it);
+			String s2 = find_node2(c[i][1], it);
+			if (s1.equals(s2))
+				continue;
+			UserNode = personRepository2.findByUid(s1); // 找到第一個帳號
+			UserNode2 = personRepository2.findByUid(s2); // 找到第二個帳號
 			UserNode.setName(combin(UserNode.getName(), UserNode2.getName()));
 			UserNode.setEmail(combin(UserNode.getEmail(), UserNode2.getEmail()));
 			UserNode.setLocation(combin(UserNode.getLocation(), UserNode2.getLocation()));
 			UserNode.setBirthday(combin(UserNode.getBirthday(), UserNode2.getBirthday()));
 			UserNode.setUid(combin(UserNode.getUid(), UserNode2.getUid()));
+
+			if (UserNode2.getFRIENDS() != null) {
+				Iterator<TwitterUser> friend = UserNode2.getFRIENDS().iterator();
+				for (int j = 0; j < UserNode2.getFRIENDS().size(); j++)
+					UserNode.friendWith(personRepository2.findByUid(friend.next().getUid()));
+			}
+			if (UserNode2.getTracking() != null) {
+				Iterator<TwitterUser> t = UserNode2.getTracking().iterator();
+				for (int j = 0; j < UserNode2.getTracking().size(); j++)
+					UserNode.Tracking(personRepository2.findByUid(t.next().getUid()));
+			}
+			if (UserNode2.getFollowing() != null) {
+				Iterator<TwitterUser> f = UserNode2.getFollowing().iterator();
+				for (int j = 0; j < UserNode2.getFollowing().size(); j++)
+					UserNode.Following(personRepository2.findByUid(f.next().getUid()));
+			}
 			personRepository2.save(UserNode);
 			personRepository2.delete(UserNode2);// 刪除第二帳號
+			
 		}
+		for(int i=0;i<rank.length; i++)
+			System.out.println(rank[i][0] +" / " + rank[i][1]);
+			
 	}
 
 	public TreeSet2(TotalPersonRepository personRepository3) {
@@ -178,28 +201,30 @@ public class TreeSet2 {
 		}
 		String[][] rank = new Ranking2(namelist, emaillist, locationlist, birthdaylist, uidlist, genderlist)
 				.getRank();
-		//for(int i=0;i<rank.length;i++)
-		//	System.out.println(rank[i][0]);
-		int m=2,n=1,p=2;
 		String[][] a = new Distinct_Tree(rank, personRepository3, m).get_Distinct_Tree();
 		String[][] b = new Iterative(a, rank, personRepository3, n, m).get_Iterative();
 		String[][] c = new ER(b, rank, personRepository3, p, m+n).get_ER();
 		TotalUser UserNode = null, UserNode2 = null;
-		for(int i=0;i<c.length;i++)
-		System.out.println(c[i][0] + " / "+c[i][1]);
+		for(int i=0;i<c.length;i++) {
+			if (c[i][0] == null)
+				break;
+		System.out.println(c[i][0] + " / "+c[i][1]);}
 		for (int i = 0; i < c.length; i++) {
 			if (c[i][0] == null)
 				break;
-			UserNode = personRepository3.findByUid(c[i][0]); // 找到第一個帳號
-			UserNode2 = personRepository3.findByUid(c[i][1]); // 找到第二個帳號
+			Iterable<TotalUser> it = personRepository3.findAll();
+			String s1 = find_node(c[i][0], it);
+			String s2 = find_node(c[i][1], it);
+			if (s1.equals(s2))
+				continue;
+			UserNode = personRepository3.findByUid(s1); // 找到第一個帳號
+			UserNode2 = personRepository3.findByUid(s2); // 找到第二個帳號
 			UserNode.setName(combin(UserNode.getName(), UserNode2.getName()));
 			UserNode.setEmail(combin(UserNode.getEmail(), UserNode2.getEmail()));
 			UserNode.setLocation(combin(UserNode.getLocation(), UserNode2.getLocation()));
 			UserNode.setBirthday(combin(UserNode.getBirthday(), UserNode2.getBirthday()));
 			UserNode.setUid(combin(UserNode.getUid(), UserNode2.getUid()));
 			UserNode.setSocial("total");
-			personRepository3.save(UserNode);
-			
 			if (UserNode2.getFRIENDS() != null) {
 				Iterator<TotalUser> friend = UserNode2.getFRIENDS().iterator();
 				for (int j = 0; j < UserNode2.getFRIENDS().size(); j++)
@@ -218,12 +243,90 @@ public class TreeSet2 {
 			personRepository3.save(UserNode);
 			personRepository3.delete(UserNode2);// 刪除第二帳號
 		}
+		for(int i=0;i<rank.length; i++)
+			System.out.println(rank[i][0] +" / " + rank[i][1]);
+	}
+	
+	String find_node(String a, Iterable<TotalUser> it) {
+		List<String> uidlist = new ArrayList<String>();
+		for (TotalUser user : it) {
+			uidlist.add(user.getUid());
+		}
+		StringTokenizer st1 = new StringTokenizer(a, ",");
+		while (st1.hasMoreTokens()) {
+			String b = st1.nextToken();
+			for (int i = 0; i < uidlist.size(); i++) {
+				StringTokenizer st2 = new StringTokenizer(uidlist.get(i), ",");
+				while (st2.hasMoreTokens()) {
+					String c = st2.nextToken();
+					if (b.equals(c)) {
+						return uidlist.get(i);
+					}
+				}
+			}
+		}
+		return a;
+	}
+	
+	String find_node2(String a, Iterable<TwitterUser> it) {
+		List<String> uidlist = new ArrayList<String>();
+		for (TwitterUser user : it) {
+			uidlist.add(user.getUid());
+		}
+		StringTokenizer st1 = new StringTokenizer(a, ",");
+		while (st1.hasMoreTokens()) {
+			String b = st1.nextToken();
+			for (int i = 0; i < uidlist.size(); i++) {
+				StringTokenizer st2 = new StringTokenizer(uidlist.get(i), ",");
+				while (st2.hasMoreTokens()) {
+					String c = st2.nextToken();
+					if (b.equals(c)) {
+						return uidlist.get(i);
+					}
+				}
+			}
+		}
+		return a;
+	}
+	
+	String find_node3(String a, Iterable<FbUser> it) {
+		List<String> uidlist = new ArrayList<String>();
+		for (FbUser user : it) {
+			uidlist.add(user.getUid());
+		}
+		StringTokenizer st1 = new StringTokenizer(a, ",");
+		while (st1.hasMoreTokens()) {
+			String b = st1.nextToken();
+			for (int i = 0; i < uidlist.size(); i++) {
+				StringTokenizer st2 = new StringTokenizer(uidlist.get(i), ",");
+				while (st2.hasMoreTokens()) {
+					String c = st2.nextToken();
+					if (b.equals(c)) {
+						return uidlist.get(i);
+					}
+				}
+			}
+		}
+		return a;
 	}
 
 	String combin(String a, String b) {
-		if (a.equals(b))
-			return a;
-		String c = a + "," + b;
+		Set<String> Set = new HashSet<String>();
+		StringTokenizer st1 = new StringTokenizer(a, ",");
+		StringTokenizer st2 = new StringTokenizer(b, ",");
+		while (st1.hasMoreTokens())
+        	Set.add(st1.nextToken());
+		while (st2.hasMoreTokens())
+        	Set.add(st2.nextToken());
+		int d=1;
+		String c = null;
+		for(String name : Set){  
+        	if(d!=Set.size()) c += name + ","; 
+        	else
+        	c +=name;  
+        	d++;
+        }
+		c = c.replace("null","");
 		return c;
 	}
 }
